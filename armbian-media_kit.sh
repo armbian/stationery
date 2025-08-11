@@ -3,30 +3,24 @@ set -euo pipefail
 
 # ./html_server.sh - Armbian Config V2 module
 
-html_server() {
+media_kit() {
 	case "${1:-}" in
 		help|-h|--help)
 			_about_html_server
 			;;
 		index)
-			# Generate an HTML index of SVG files
 			_html_server_index
 			;;
 		icon)
-			# Generate a set of icons from SVG files
 			_icon_set_from_svg
 			;;
 		server)
-			# Start a simple HTTP server using Python
-			if ! command -v python3 &> /dev/null; then
-				echo "Python 3 is required to run the server. Please install it."
-				exit 1
-			fi
 			_html_server_main "${2:-.}"
 			;;
-		"")
+		all)
 			_icon_set_from_svg
 			_html_server_index
+			_html_server_main "${2:-.}"
 			;;
 		*)
 			_about_html_server
@@ -35,9 +29,11 @@ html_server() {
 }
 
 _html_server_main() {
-	# Use a default directory
 	local DIR="${1:-.}"
-	# Run Python web server for HTTP (CGI dropped for now)
+	if ! command -v python3 &> /dev/null; then
+		echo "Python 3 is required to run the server. Please install it."
+		exit 1
+	fi
 	echo "Starting Python web server"
 	python3 -m http.server 8080 &
 
@@ -63,12 +59,8 @@ _html_server_main() {
 }
 
 _html_server_index() {
-	# Directory containing SVGs
 	SVG_DIR="./images/scalable"
-	# Output HTML file
 	OUTPUT="./index.html"
-
-	# Arrays to hold categories
 	arm_images=()
 	conf_images=()
 	other_images=()
@@ -123,9 +115,7 @@ _html_server_index() {
 	echo "<main>"
 	echo "<p>We've put together some logos and icons for you to use in your articles and projects.</p>"
 
-	# Flex row for left (arm), right (conf)
 	echo "<div class=\"flex-row\">"
-	# Left: arm*
 	echo "<div class=\"flex-col media-group\" style=\"flex:1\"><h3 class=\"center\">Armbian Logos</h3>"
 	for file in "${arm_images[@]}"; do
 		name=$(basename "$file" .svg)
@@ -140,7 +130,6 @@ _html_server_index() {
 	done
 	echo "</div>"
 
-	# Right: conf*
 	echo "<div class=\"flex-col media-group\" style=\"flex:1\"><h3 class=\"center\">Config Logos</h3>"
 	for file in "${conf_images[@]}"; do
 		name=$(basename "$file" .svg)
@@ -156,7 +145,6 @@ _html_server_index() {
 	echo "</div>"
 	echo "</div>"
 
-	# Bottom: rest
 	if (( ${#other_images[@]} )); then
 		echo "<div class=\"media-group\"><h3 class=\"center\">Other Logos & Icons</h3><div class=\"flex-row\" style=\"flex-wrap:wrap;justify-content:center;gap:2em;\">"
 		for file in "${other_images[@]}"; do
@@ -185,120 +173,103 @@ EOF
 	} > "$OUTPUT"
 
 	echo "HTML file created: $OUTPUT"
-	# Favicon logic
-	# Try to create favicon.ico from a suitable PNG (e.g., 32x32 or 64x64)
-	if command -v convert &> /dev/null; then
-		if [[ -f "images/32x32/configng-tux_v1.5.png" ]]; then
-		convert images/32x32/configng-tux_v1.5.png -resize 32x32 favicon.ico
-		echo "Favicon created: favicon.ico"
-		else
-		echo "No PNG found for favicon (images/32x32/configng-tux_v1.5.png missing)"
-		fi
-	else
-		echo "ImageMagick 'convert' not found, cannot create favicon.ico"
-	fi
-
 }
 
 _icon_set_from_svg() {
-
-# Directory containing SVGs
-SRC_DIR="./SVG"
-# List of desired sizes
-SIZES=(16 32 64 128 256 512)
-
-# Check for ImageMagick's convert command
-if ! command -v convert &> /dev/null; then
-	echo "Error: ImageMagick 'convert' command not found."
-	read -p "Would you like to install ImageMagick using 'sudo apt install imagemagick'? [Y/n] " yn
-	case "$yn" in
-		[Yy]* | "" )
-		echo "Installing ImageMagick..."
-		sudo apt update && sudo apt install imagemagick
-		if ! command -v convert &> /dev/null; then
-			echo "Installation failed or 'convert' still not found. Exiting."
-			exit 1
-		fi
-		;;
-		* )
-		echo "Cannot proceed without ImageMagick. Exiting."
-		exit 1
-	;;
-	esac
-fi
-
-# Check if source directory exists
-if [ ! -d "$SRC_DIR" ]; then
-	echo "Error: Source directory '$SRC_DIR' does not exist."
-	exit 1
-fi
-
-# Check if SVGs exist in the source directory
-shopt -s nullglob
-svg_files=("$SRC_DIR"/*.svg)
-if [ ${#svg_files[@]} -eq 0 ]; then
-	echo "Error: No SVG files found in '$SRC_DIR'."
-	exit 1
-fi
-shopt -u nullglob
-
-# Loop over each SVG file in the scalable directory
-for svg in "${svg_files[@]}"; do
-	# Extract the base filename without extension
-	base=$(basename "$svg" .svg)
-	# For each size, generate the PNG in the corresponding directory
-	for size in "${SIZES[@]}"; do
-		OUT_DIR="images/${size}x${size}"
-		mkdir -p "$OUT_DIR"
-		OUT_FILE="${OUT_DIR}/${base}.png"
-		# Only generate if missing or source SVG is newer
-		if [[ ! -f "$OUT_FILE" || "$svg" -nt "$OUT_FILE" ]]; then
-			convert -background none -resize ${size}x${size} "$svg" "$OUT_FILE"
-			if [ $? -eq 0 ]; then
-				echo "Generated $OUT_FILE"
-			else
-				echo "Failed to convert $svg to $OUT_FILE"
+	SRC_DIR="./SVG"
+	SIZES=(16 32 64 128 256 512)
+	# Check for ImageMagick's convert command
+	if ! command -v convert &> /dev/null; then
+		echo "Error: ImageMagick 'convert' command not found."
+		read -p "Would you like to install ImageMagick using 'sudo apt install imagemagick'? [Y/n] " yn
+		case "$yn" in
+			[Yy]* | "" )
+			echo "Installing ImageMagick..."
+			sudo apt update && sudo apt install imagemagick
+			if ! command -v convert &> /dev/null; then
+				echo "Installation failed or 'convert' still not found. Exiting."
+				exit 1
 			fi
-		fi
+			;;
+			* )
+			echo "Cannot proceed without ImageMagick. Exiting."
+			exit 1
+			;;
+		esac
+	fi
+
+	if [ ! -d "$SRC_DIR" ]; then
+		echo "Error: Source directory '$SRC_DIR' does not exist."
+		exit 1
+	fi
+
+	shopt -s nullglob
+	svg_files=("$SRC_DIR"/*.svg)
+	if [ ${#svg_files[@]} -eq 0 ]; then
+		echo "Error: No SVG files found in '$SRC_DIR'."
+		exit 1
+	fi
+	shopt -u nullglob
+
+	for svg in "${svg_files[@]}"; do
+		base=$(basename "$svg" .svg)
+		for size in "${SIZES[@]}"; do
+			OUT_DIR="images/${size}x${size}"
+			mkdir -p "$OUT_DIR"
+			OUT_FILE="${OUT_DIR}/${base}.png"
+			if [[ ! -f "$OUT_FILE" || "$svg" -nt "$OUT_FILE" ]]; then
+				convert -background none -resize ${size}x${size} "$svg" "$OUT_FILE"
+				if [ $? -eq 0 ]; then
+					echo "Generated $OUT_FILE"
+				else
+					echo "Failed to convert $svg to $OUT_FILE"
+				fi
+			fi
+		done
 	done
-done
 
-cp -r $SRC_DIR "images/scalable"
+	cp -r $SRC_DIR "images/scalable"
 
-convert images/scalable/armbian-tux_v1.5.svg -background none -resize 16x16 favicon-16.png
-convert images/scalable/armbian-tux_v1.5.svg -background none -resize 32x32 favicon-32.png
-convert images/scalable/armbian-tux_v1.5.svg -background none -resize 48x48 favicon-48.png
-convert favicon-16.png favicon-32.png favicon-48.png favicon.ico
-rm favicon-16.png favicon-32.png favicon-48.png
-
+	# Generate proper multi-resolution favicon.ico from SVG (always overwrites old one)
+	FAVICON_SVG="images/scalable/armbian-tux_v1.5.svg"
+	if [[ -f "$FAVICON_SVG" ]]; then
+		convert "$FAVICON_SVG" -background none -resize 16x16 favicon-16.png
+		convert "$FAVICON_SVG" -background none -resize 32x32 favicon-32.png
+		convert "$FAVICON_SVG" -background none -resize 48x48 favicon-48.png
+		convert favicon-16.png favicon-32.png favicon-48.png favicon.ico
+		rm favicon-16.png favicon-32.png favicon-48.png
+		echo "Multi-resolution favicon.ico created from $FAVICON_SVG"
+	else
+		echo "Could not create favicon.ico (SVG not found: $FAVICON_SVG)"
+	fi
 }
-
 
 _about_html_server() {
 	cat <<EOF
-Usage: html_server <command> [options]
+Usage: media_kit <command> [options]
 
 Commands:
     help    - Show this help message.
     icon    - Generate a PNG icon set from SVG files in ./images/scalable.
     index   - Generate an HTML media kit index of all SVGs and icons.
     server  - Serve the HTML and icon directory using a simple HTTP server.
+    all     - Run icon generation, HTML index generation and start the server.
 
 Examples:
     # Show help
-    html_server help
+    media_kit help
 
     # Generate icons from SVGs
-    html_server icon
+    media_kit icon
 
     # Generate the HTML media kit
-    html_server index
+    media_kit index
 
     # Generate the HTML and start the server
-    html_server index serve
+    media_kit index serve
 
     # Start the server (serves current directory by default)
-    html_server server [directory]
+    media_kit server [directory]
 
 Notes:
     - All commands accept '--help', '-h', or 'help' for details, if implemented.
@@ -312,15 +283,12 @@ EOF
 ### START ./html_server.sh - Armbian Config V2 test entrypoint
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-	# --- Capture and assert help output ---
-	help_output="$(html_server help)"
-	echo "$help_output" | grep -q "Usage: html_server" || {
+	help_output="$(media_kit help)"
+	echo "$help_output" | grep -q "Usage: media_kit" || {
 		echo "fail: Help output does not contain expected usage string"
 		echo "test complete"
 		exit 1
 	}
-	# --- end assertion ---
-	html_server "$@"
+	media_kit "$@"
 fi
-
 ### END ./html_server.sh - Armbian Config V2 test entrypoint
