@@ -146,7 +146,7 @@ _html_server_index() {
 	echo "</div>"
 
 	if (( ${#other_images[@]} )); then
-		echo "<div class=\"media-group\"><h3 class=\"center\">Other Logos & Icons</h3><div class=\"flex-row\" style=\"flex-wrap:wrap;justify-content:center;gap:2em;\">"
+		echo "<div class=\"media-group\"><h3 class=\"center\">Legacy Logos & Icons</h3><div class=\"flex-row\" style=\"flex-wrap:wrap;justify-content:center;gap:2em;\">"
 		for file in "${other_images[@]}"; do
 			name=$(basename "$file" .svg)
 			echo "<div style=\"text-align:center\">"
@@ -166,7 +166,7 @@ _html_server_index() {
 	echo "</main>"
 	cat <<EOF
 	<footer>
-		Armbian Config V2 &copy; $(date +%Y) | Powered by open source<br>
+		Armbian Configng_V2 &copy; $(date +%Y) | Powered by open source<br>
 	</footer>
 EOF
 	echo "</body></html>"
