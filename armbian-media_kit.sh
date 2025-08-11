@@ -18,6 +18,10 @@ html_server() {
 			;;
 		server)
 			# Start a simple HTTP server using Python
+			if ! command -v python3 &> /dev/null; then
+				echo "Python 3 is required to run the server. Please install it."
+				exit 1
+			fi
 			_html_server_main "${2:-.}"
 			;;
 		"")
@@ -87,6 +91,7 @@ _html_server_index() {
 	echo "<!DOCTYPE html>"
 	echo "<html><head>"
 	echo "<meta charset='UTF-8'><title>Armbian Media Kit</title>"
+	echo "<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\">"
 	echo "<style>
 	body { background: #fff; color: #000; font-family: sans-serif; margin: 0; }
 	header { background: #23262f; color: #fff; padding: 0.3rem 1rem; display: flex; align-items: center; min-height: 56px; }
@@ -127,9 +132,9 @@ _html_server_index() {
 		echo "<a href=\"$file\">"
 		echo "  <img src=\"$file\" alt=\"$name.svg\" width=\"64\" height=\"64\">"
 		echo "</a>"
-		echo "<p>Download PNG:</p><ul>"
+		echo "<ul>"
 		for sz in 16 32 64 128 256 512; do
-			echo "<li><a href=\"images/${sz}x${sz}/${name}.png\">${sz}x${sz} ${name}.png</a></li>"
+			echo "<li><a href=\"images/${sz}x${sz}/${name}.png\">${sz}x${sz}</a></li>"
 		done
 		echo "</ul><hr>"
 	done
@@ -142,9 +147,9 @@ _html_server_index() {
 		echo "<a href=\"$file\">"
 		echo "  <img src=\"$file\" alt=\"$name.svg\" width=\"64\" height=\"64\">"
 		echo "</a>"
-		echo "<p>Download PNG:</p><ul>"
+		echo "<ul>"
 		for sz in 16 32 64 128 256 512; do
-			echo "<li><a href=\"images/${sz}x${sz}/${name}.png\">${sz}x${sz} ${name}.png</a></li>"
+			echo "<li><a href=\"images/${sz}x${sz}/${name}.png\">${sz}x${sz}</a></li>"
 		done
 		echo "</ul><hr>"
 	done
@@ -160,7 +165,7 @@ _html_server_index() {
 			echo "<a href=\"$file\">"
 			echo "  <img src=\"$file\" alt=\"$name.svg\" width=\"64\" height=\"64\">"
 			echo "</a>"
-			echo "<p>Download PNG:</p><ul>"
+			echo "<ul>"
 			for sz in 16 32 64 128 256 512; do
 				echo "<li><a href=\"images/${sz}x${sz}/${name}.png\">${sz}x${sz} ${name}.png</a></li>"
 			done
@@ -180,12 +185,25 @@ EOF
 	} > "$OUTPUT"
 
 	echo "HTML file created: $OUTPUT"
+	# Favicon logic
+	# Try to create favicon.ico from a suitable PNG (e.g., 32x32 or 64x64)
+	if command -v convert &> /dev/null; then
+		if [[ -f "images/32x32/configng-tux_v1.5.png" ]]; then
+		convert images/32x32/configng-tux_v1.5.png -resize 32x32 favicon.ico
+		echo "Favicon created: favicon.ico"
+		else
+		echo "No PNG found for favicon (images/32x32/configng-tux_v1.5.png missing)"
+		fi
+	else
+		echo "ImageMagick 'convert' not found, cannot create favicon.ico"
+	fi
+
 }
 
 _icon_set_from_svg() {
 
 # Directory containing SVGs
-SRC_DIR="SVG"
+SRC_DIR="./SVG"
 # List of desired sizes
 SIZES=(16 32 64 128 256 512)
 
@@ -246,6 +264,12 @@ for svg in "${svg_files[@]}"; do
 done
 
 cp -r $SRC_DIR "images/scalable"
+
+convert images/scalable/armbian-tux_v1.5.svg -background none -resize 16x16 favicon-16.png
+convert images/scalable/armbian-tux_v1.5.svg -background none -resize 32x32 favicon-32.png
+convert images/scalable/armbian-tux_v1.5.svg -background none -resize 48x48 favicon-48.png
+convert favicon-16.png favicon-32.png favicon-48.png favicon.ico
+rm favicon-16.png favicon-32.png favicon-48.png
 
 }
 
