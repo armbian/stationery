@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='UTF-8'>
+	<title>Armbian Logos</title>
+	<style>
+		body { font-family: sans-serif; }
+		img { margin: 0.5em; }
+	</style>
+</head>
+<body>
+	<h1>Armbian Logos and Icons</h1>
+	<div id="logos"></div>
+	<script>
+		fetch('logos.json')
+			.then(response => response.json())
+			.then(data => {
+				const container = document.getElementById('logos');
+				data.forEach(logo => {
+					const div = document.createElement('div');
+					div.innerHTML = `
+						<hr>
+						<img src="${logo.svg}" alt="${logo.name}" width="64" height="64">
+						<p>Download PNG:</p>
+						<ul>
+							${logo.pngs.map(p => `<li><a href="${p}">${p.split('/').pop()}</a></li>`).join('')}
+						</ul>
+					`;
+					container.appendChild(div);
+				});
+			});
+	</script>
+	<p>All logos are licensed under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> license.</p>
+	<p>For more information, please refer to the <a href="https://www.armbian.com/brand/">Armbian Brand Guidelines</a>.</p>
+</body>
+</html>

@@ -1,0 +1,86 @@
+[
+  {
+    "name": "armbian_cpu_v2.0",
+    "svg": "./images/scalable/armbian_cpu_v2.0.svg",
+    "pngs": [
+      "share/icons/hicolor/16x16/armbian_cpu_v2.0.png",
+      "share/icons/hicolor/32x32/armbian_cpu_v2.0.png",
+      "share/icons/hicolor/64x64/armbian_cpu_v2.0.png",
+      "share/icons/hicolor/128x128/armbian_cpu_v2.0.png",
+      "share/icons/hicolor/256x256/armbian_cpu_v2.0.png",
+      "share/icons/hicolor/512x512/armbian_cpu_v2.0.png"
+    ]
+  },
+  {
+    "name": "armbian_discord_v2.1",
+    "svg": "./images/scalable/armbian_discord_v2.1.svg",
+    "pngs": [
+      "share/icons/hicolor/16x16/armbian_discord_v2.1.png",
+      "share/icons/hicolor/32x32/armbian_discord_v2.1.png",
+      "share/icons/hicolor/64x64/armbian_discord_v2.1.png",
+      "share/icons/hicolor/128x128/armbian_discord_v2.1.png",
+      "share/icons/hicolor/256x256/armbian_discord_v2.1.png",
+      "share/icons/hicolor/512x512/armbian_discord_v2.1.png"
+    ]
+  },
+  {
+    "name": "armbian_font.v2.1",
+    "svg": "./images/scalable/armbian_font.v2.1.svg",
+    "pngs": [
+      "share/icons/hicolor/16x16/armbian_font.v2.1.png",
+      "share/icons/hicolor/32x32/armbian_font.v2.1.png",
+      "share/icons/hicolor/64x64/armbian_font.v2.1.png",
+      "share/icons/hicolor/128x128/armbian_font.v2.1.png",
+      "share/icons/hicolor/256x256/armbian_font.v2.1.png",
+      "share/icons/hicolor/512x512/armbian_font.v2.1.png"
+    ]
+  },
+  {
+    "name": "armbian-logo_dark_v2.1",
+    "svg": "./images/scalable/armbian-logo_dark_v2.1.svg",
+    "pngs": [
+      "share/icons/hicolor/16x16/armbian-logo_dark_v2.1.png",
+      "share/icons/hicolor/32x32/armbian-logo_dark_v2.1.png",
+      "share/icons/hicolor/64x64/armbian-logo_dark_v2.1.png",
+      "share/icons/hicolor/128x128/armbian-logo_dark_v2.1.png",
+      "share/icons/hicolor/256x256/armbian-logo_dark_v2.1.png",
+      "share/icons/hicolor/512x512/armbian-logo_dark_v2.1.png"
+    ]
+  },
+  {
+    "name": "armbian-logo_light_v2.1",
+    "svg": "./images/scalable/armbian-logo_light_v2.1.svg",
+    "pngs": [
+      "share/icons/hicolor/16x16/armbian-logo_light_v2.1.png",
+      "share/icons/hicolor/32x32/armbian-logo_light_v2.1.png",
+      "share/icons/hicolor/64x64/armbian-logo_light_v2.1.png",
+      "share/icons/hicolor/128x128/armbian-logo_light_v2.1.png",
+      "share/icons/hicolor/256x256/armbian-logo_light_v2.1.png",
+      "share/icons/hicolor/512x512/armbian-logo_light_v2.1.png"
+    ]
+  },
+  {
+    "name": "configng_cog_v2.0",
+    "svg": "./images/scalable/configng_cog_v2.0.svg",
+    "pngs": [
+      "share/icons/hicolor/16x16/configng_cog_v2.0.png",
+      "share/icons/hicolor/32x32/configng_cog_v2.0.png",
+      "share/icons/hicolor/64x64/configng_cog_v2.0.png",
+      "share/icons/hicolor/128x128/configng_cog_v2.0.png",
+      "share/icons/hicolor/256x256/configng_cog_v2.0.png",
+      "share/icons/hicolor/512x512/configng_cog_v2.0.png"
+    ]
+  },
+  {
+    "name": "configng-mascot_v2.0",
+    "svg": "./images/scalable/configng-mascot_v2.0.svg",
+    "pngs": [
+      "share/icons/hicolor/16x16/configng-mascot_v2.0.png",
+      "share/icons/hicolor/32x32/configng-mascot_v2.0.png",
+      "share/icons/hicolor/64x64/configng-mascot_v2.0.png",
+      "share/icons/hicolor/128x128/configng-mascot_v2.0.png",
+      "share/icons/hicolor/256x256/configng-mascot_v2.0.png",
+      "share/icons/hicolor/512x512/configng-mascot_v2.0.png"
+    ]
+  }
+]
