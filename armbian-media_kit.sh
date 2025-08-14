@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ./html_server.sh - Armbian Config V2 module
+# ./armbian-media_kit.sh - Armbian Config V2 module
 
 media_kit() {
 	case "${1:-}" in
@@ -9,7 +9,8 @@ media_kit() {
 			_about_html_server
 			;;
 		index)
-			_html_server_index
+			_html_page > index.html
+
 			;;
 		icon)
 			_icon_set_from_svg
@@ -19,7 +20,9 @@ media_kit() {
 			;;
 		all)
 			_icon_set_from_svg
-			_html_server_index
+
+			_html_server_index_json
+			_html_page > index.html
 			_html_server_main "${2:-.}"
 			;;
 		*)
@@ -27,6 +30,80 @@ media_kit() {
 			;;
 	esac
 }
+
+_html_page() {
+	cat <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='UTF-8'>
+	<title>Armbian Logos</title>
+	<style>
+		body { font-family: sans-serif; }
+		img { margin: 0.5em; }
+	</style>
+</head>
+<body>
+	<h1>Armbian Logos and Icons</h1>
+	<div id="logos"></div>
+	<script>
+		fetch('logos.json')
+			.then(response => response.json())
+			.then(data => {
+				const container = document.getElementById('logos');
+				data.forEach(logo => {
+					const div = document.createElement('div');
+					div.innerHTML = \`
+						<hr>
+						<img src="\${logo.svg}" alt="\${logo.name}" width="64" height="64">
+						<p>Download PNG:</p>
+						<ul>
+							\${logo.pngs.map(p => \`<li><a href="\${p}">\${p.split('/').pop()}</a></li>\`).join('')}
+						</ul>
+					\`;
+					container.appendChild(div);
+				});
+			});
+	</script>
+	<p>All logos are licensed under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> license.</p>
+	<p>For more information, please refer to the <a href="https://www.armbian.com/brand/">Armbian Brand Guidelines</a>.</p>
+</body>
+</html>
+EOF
+}
+
+_html_server_index_json() {
+	# Directory containing SVGs
+	SVG_DIR="./images/scalable"
+	# Output JSON file
+	OUTPUT="logos.json"
+
+	echo "[" > "$OUTPUT"
+	first=1
+	local SIZES=(16 32 64 128 256 512)
+	for file in "$SVG_DIR"/*.svg; do
+		[[ -e "$file" ]] || continue
+		name=$(basename "$file" .svg)
+		[[ $first -eq 0 ]] && echo "," >> "$OUTPUT"
+		first=0
+		echo "  {" >> "$OUTPUT"
+		echo "    \"name\": \"$name\"," >> "$OUTPUT"
+		echo "    \"svg\": \"$file\"," >> "$OUTPUT"
+		echo "    \"pngs\": [" >> "$OUTPUT"
+		for i in "${!SIZES[@]}"; do
+			sz="${SIZES[$i]}"
+			echo -n "      \"share/icons/hicolor/${sz}x${sz}/${name}.png\"" >> "$OUTPUT"
+			[[ $i -lt $((${#SIZES[@]}-1)) ]] && echo "," >> "$OUTPUT"
+		done
+		echo "" >> "$OUTPUT"
+		echo "    ]" >> "$OUTPUT"
+		echo -n "  }" >> "$OUTPUT"
+	done
+	echo "" >> "$OUTPUT"
+	echo "]" >> "$OUTPUT"
+	echo "JSON file created: $OUTPUT"
+}
+
 
 _html_server_main() {
 	local DIR="${1:-.}"
@@ -58,125 +135,8 @@ _html_server_main() {
 	echo "Test complete"
 }
 
-_html_server_index() {
-	SVG_DIR="./images/scalable"
-	OUTPUT="./index.html"
-	arm_images=()
-	conf_images=()
-	other_images=()
-
-	shopt -s nullglob
-	for file in "$SVG_DIR"/*.svg; do
-		[[ -e "$file" ]] || continue
-		name=$(basename "$file" .svg)
-		if [[ $name == arm* ]]; then
-			arm_images+=("$file")
-		elif [[ $name == conf* ]]; then
-			conf_images+=("$file")
-		else
-			other_images+=("$file")
-		fi
-	done
-	shopt -u nullglob
-
-	{
-	echo "<!DOCTYPE html>"
-	echo "<html><head>"
-	echo "<meta charset='UTF-8'><title>Armbian Media Kit</title>"
-	echo "<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\">"
-	echo "<style>
-	body { background: #fff; color: #000; font-family: sans-serif; margin: 0; }
-	header { background: #23262f; color: #fff; padding: 0.3rem 1rem; display: flex; align-items: center; min-height: 56px; }
-	header .header-logo { display: flex; gap: 1em; padding: 0.1rem }
-	header a { display: inline-block; }
-	header img { vertical-align: middle; height: 64px; width: auto; }
-	footer { background: #23262f; color: #fff; padding: 1rem 2rem; text-align: center; font-size: 0.9em; }
-	footer a { color: #3ea6ff; }
-	main { padding: 2rem; }
-	hr { border: 0; border-bottom: 1px solid #353535; margin: 2em 0; }
-	a { color: #3ea6ff; }
-	ul { padding-left: 1.2em; }
-	.flex-row { display: flex; justify-content: space-between; gap: 3em; }
-	.flex-col { display: flex; flex-direction: column; gap: 1.5em; }
-	.center { text-align: center; }
-	.media-group { margin-bottom: 2em; }
-	</style>"
-	echo "</head><body>"
-	echo "<header>"
-	echo "  <span class=\"header-logo\">"
-	echo "    <a href=\"https://www.armbian.com/\" target=\"_blank\" rel=\"noopener\">"
-	echo "      <img src=\"images/scalable/armbian-tux_v1.5.svg\" alt=\"armbian-tux_v1.5.svg\">"
-	echo "    </a>"
-	echo "    <a href=\"https://www.armbian.com/\" target=\"_blank\" rel=\"noopener\">"
-	echo "      <img src=\"images/scalable/armbian_logo_v2.svg\" alt=\"armbian_logo_v2.svg\">"
-	echo "    </a>"
-	echo "  </span>"
-	echo "</header>"
-	echo "<main>"
-	echo "<p>We've put together some logos and icons for you to use in your articles and projects.</p>"
-
-	echo "<div class=\"flex-row\">"
-	echo "<div class=\"flex-col media-group\" style=\"flex:1\"><h3 class=\"center\">Armbian Logos</h3>"
-	for file in "${arm_images[@]}"; do
-		name=$(basename "$file" .svg)
-		echo "<a href=\"$file\">"
-		echo "  <img src=\"$file\" alt=\"$name.svg\" width=\"64\" height=\"64\">"
-		echo "</a>"
-		echo "<ul>"
-		for sz in 16 32 64 128 256 512; do
-			echo "<li><a href=\"images/${sz}x${sz}/${name}.png\">${sz}x${sz}</a></li>"
-		done
-		echo "</ul><hr>"
-	done
-	echo "</div>"
-
-	echo "<div class=\"flex-col media-group\" style=\"flex:1\"><h3 class=\"center\">Config Logos</h3>"
-	for file in "${conf_images[@]}"; do
-		name=$(basename "$file" .svg)
-		echo "<a href=\"$file\">"
-		echo "  <img src=\"$file\" alt=\"$name.svg\" width=\"64\" height=\"64\">"
-		echo "</a>"
-		echo "<ul>"
-		for sz in 16 32 64 128 256 512; do
-			echo "<li><a href=\"images/${sz}x${sz}/${name}.png\">${sz}x${sz}</a></li>"
-		done
-		echo "</ul><hr>"
-	done
-	echo "</div>"
-	echo "</div>"
-
-	if (( ${#other_images[@]} )); then
-		echo "<div class=\"media-group\"><h3 class=\"center\">Legacy Logos & Icons</h3><div class=\"flex-row\" style=\"flex-wrap:wrap;justify-content:center;gap:2em;\">"
-		for file in "${other_images[@]}"; do
-			name=$(basename "$file" .svg)
-			echo "<div style=\"text-align:center\">"
-			echo "<a href=\"$file\">"
-			echo "  <img src=\"$file\" alt=\"$name.svg\" width=\"64\" height=\"64\">"
-			echo "</a>"
-			echo "<ul>"
-			for sz in 16 32 64 128 256 512; do
-				echo "<li><a href=\"images/${sz}x${sz}/${name}.png\">${sz}x${sz} ${name}.png</a></li>"
-			done
-			echo "</ul>"
-			echo "</div>"
-		done
-		echo "</div></div>"
-	fi
-
-	echo "</main>"
-	cat <<EOF
-	<footer>
-		Armbian Configng_V2 &copy; $(date +%Y) | Powered by open source<br>
-	</footer>
-EOF
-	echo "</body></html>"
-	} > "$OUTPUT"
-
-	echo "HTML file created: $OUTPUT"
-}
-
 _icon_set_from_svg() {
-	SRC_DIR="./SVG"
+	SRC_DIR="./brand_src"
 	SIZES=(16 32 64 128 256 512)
 	# Check for ImageMagick's convert command
 	if ! command -v convert &> /dev/null; then
@@ -231,7 +191,7 @@ _icon_set_from_svg() {
 	cp -r $SRC_DIR "images/scalable"
 
 	# Generate proper multi-resolution favicon.ico from SVG (always overwrites old one)
-	FAVICON_SVG="images/scalable/armbian-tux_v1.5.svg"
+	FAVICON_SVG="./brand_src/armbian_discord_v2.1.svg"
 	if [[ -f "$FAVICON_SVG" ]]; then
 		convert "$FAVICON_SVG" -background none -resize 16x16 favicon-16.png
 		convert "$FAVICON_SVG" -background none -resize 32x32 favicon-32.png
