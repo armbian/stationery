@@ -39,6 +39,111 @@ _html_page() {
 	<meta charset='UTF-8'>
 	<title>Armbian Logos</title>
 	<style>
+		body {
+			font-family: sans-serif;
+			margin: 0;
+			padding: 0;
+			background: #f8f8f8;
+		}
+		header, footer {
+			background: #333;
+			color: #fff;
+			padding: 1em;
+			text-align: center;
+		}
+		main {
+			padding: 1em;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			grid-template-rows: auto auto;
+			gap: 1em;
+		}
+		.section {
+			padding: 1em;
+			background: #f0f0f0;
+			border-radius: 6px;
+		}
+		.section h2 {
+			margin-top: 0;
+		}
+		img { 
+			margin: 0.5em; 
+		}
+		.legacy {
+			opacity: 0.85; /* Slightly dim legacy sections */
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>Armbian Logos and Icons</h1>
+	</header>
+
+	<main>
+		<div id="armbian-section" class="section">
+			<h2>Armbian</h2>
+			<div id="armbian-logos"></div>
+		</div>
+		<div id="configng-section" class="section">
+			<h2>ConfigNG</h2>
+			<div id="configng-logos"></div>
+		</div>
+		<div id="armbian-legacy-section" class="section legacy">
+			<h2>Armbian Legacy</h2>
+			<div id="armbian-legacy-logos"></div>
+		</div>
+		<div id="configng-legacy-section" class="section legacy">
+			<h2>ConfigNG Legacy</h2>
+			<div id="configng-legacy-logos"></div>
+		</div>
+	</main>
+
+	<footer>
+		<p>For more information, see <a href="https://www.armbian.com/brand/" style="color: #fff;">Armbian Brand Guidelines</a>.</p>
+	</footer>
+
+	<script>
+		fetch('logos.json')
+			.then(response => response.json())
+			.then(data => {
+				data.forEach(logo => {
+					let sectionId;
+					switch (logo.category) {
+						case 'armbian': sectionId = 'armbian-logos'; break;
+						case 'armbian-legacy': sectionId = 'armbian-legacy-logos'; break;
+						case 'configng': sectionId = 'configng-logos'; break;
+						case 'configng-legacy': sectionId = 'configng-legacy-logos'; break;
+						default: return;
+					}
+					const container = document.getElementById(sectionId);
+					if (!container) return;
+					const div = document.createElement('div');
+					div.innerHTML = \`
+						<hr>
+						<img src="\${logo.svg}" alt="\${logo.name}" width="64" height="64">
+						<p>Download PNG:</p>
+						<ul>
+							\${logo.pngs.map(p => \`<li><a href="\${p}">\${p.split('/').pop()}</a></li>\`).join('')}
+						</ul>
+					\`;
+					container.appendChild(div);
+				});
+			});
+	</script>
+</body>
+</html>
+EOF
+}
+
+
+_html_page_v0.1() {
+	cat <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='UTF-8'>
+	<title>Armbian Logos</title>
+	<style>
 		body { font-family: sans-serif; }
 		img { margin: 0.5em; }
 	</style>
@@ -65,7 +170,7 @@ _html_page() {
 				});
 			});
 	</script>
-	<p>All logos are licensed under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> license.</p>
+	
 	<p>For more information, please refer to the <a href="https://www.armbian.com/brand/">Armbian Brand Guidelines</a>.</p>
 </body>
 </html>
@@ -191,7 +296,7 @@ _icon_set_from_svg() {
 	cp -r $SRC_DIR "images/scalable"
 
 	# Generate proper multi-resolution favicon.ico from SVG (always overwrites old one)
-	FAVICON_SVG="./brand_src/armbian_discord_v2.1.svg"
+	FAVICON_SVG="./images/512x512/armbian-head-icon.png"
 	if [[ -f "$FAVICON_SVG" ]]; then
 		convert "$FAVICON_SVG" -background none -resize 16x16 favicon-16.png
 		convert "$FAVICON_SVG" -background none -resize 32x32 favicon-32.png
