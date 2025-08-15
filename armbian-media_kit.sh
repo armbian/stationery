@@ -30,9 +30,8 @@ media_kit() {
 			;;
 	esac
 }
-
 _html_page() {
-	cat <<EOF
+	cat <<'EOF'
 <!DOCTYPE html>
 <html>
 <head>
@@ -58,6 +57,12 @@ _html_page() {
 			grid-template-rows: auto auto;
 			gap: 1em;
 		}
+		@media (max-width: 768px) {
+			main {
+				grid-template-columns: 1fr;
+				grid-template-rows: auto;
+			}
+		}
 		.section {
 			padding: 1em;
 			background: #f0f0f0;
@@ -66,11 +71,19 @@ _html_page() {
 		.section h2 {
 			margin-top: 0;
 		}
-		img { 
-			margin: 0.5em; 
+		img {
+			margin: 0.5em;
+			vertical-align: middle;
 		}
 		.legacy {
 			opacity: 0.85; /* Slightly dim legacy sections */
+		}
+		ul {
+			list-style-type: none;
+			padding-left: 0;
+		}
+		ul li {
+			margin: 0.2em 0;
 		}
 	</style>
 </head>
@@ -99,7 +112,9 @@ _html_page() {
 	</main>
 
 	<footer>
-		<p>For more information, see <a href="https://www.armbian.com/brand/" style="color: #fff;">Armbian Brand Guidelines</a>.</p>
+		<p>For more information, see 
+			<a href="https://www.armbian.com/brand/" style="color: #fff;">Armbian Brand Guidelines</a>.
+		</p>
 	</footer>
 
 	<script>
@@ -117,15 +132,23 @@ _html_page() {
 					}
 					const container = document.getElementById(sectionId);
 					if (!container) return;
+
+					// Adapt for PNG object format
+					const pngList = logo.pngs.map(p => {
+						if (typeof p === 'string') {
+							return `<li><a href="${p}">${p.split('/').pop()}</a></li>`;
+						} else {
+							return `<li><a href="${p.path}">${p.size}</a> – ${p.kb} KB</li>`;
+						}
+					}).join('');
+
 					const div = document.createElement('div');
-					div.innerHTML = \`
+					div.innerHTML = `
 						<hr>
-						<img src="\${logo.svg}" alt="\${logo.name}" width="64" height="64">
+						<img src="${logo.svg}" alt="${logo.name}" width="64" height="64">
 						<p>Download PNG:</p>
-						<ul>
-							\${logo.pngs.map(p => \`<li><a href="\${p}">\${p.split('/').pop()}</a></li>\`).join('')}
-						</ul>
-					\`;
+						<ul>${pngList}</ul>
+					`;
 					container.appendChild(div);
 				});
 			});
@@ -134,7 +157,6 @@ _html_page() {
 </html>
 EOF
 }
-
 
 _html_page_v0.1() {
 	cat <<EOF
@@ -178,35 +200,76 @@ EOF
 }
 
 _html_server_index_json() {
-	# Directory containing SVGs
-	SVG_DIR="./images/scalable"
-	# Output JSON file
-	OUTPUT="logos.json"
+    SVG_DIR="./brand_src"
+    OUTPUT="logos.json"
+    SIZES=(16 32 512)
 
-	echo "[" > "$OUTPUT"
-	first=1
-	local SIZES=(16 32 64 128 256 512)
-	for file in "$SVG_DIR"/*.svg; do
-		[[ -e "$file" ]] || continue
-		name=$(basename "$file" .svg)
-		[[ $first -eq 0 ]] && echo "," >> "$OUTPUT"
-		first=0
-		echo "  {" >> "$OUTPUT"
-		echo "    \"name\": \"$name\"," >> "$OUTPUT"
-		echo "    \"svg\": \"$file\"," >> "$OUTPUT"
-		echo "    \"pngs\": [" >> "$OUTPUT"
-		for i in "${!SIZES[@]}"; do
-			sz="${SIZES[$i]}"
-			echo -n "      \"share/icons/hicolor/${sz}x${sz}/${name}.png\"" >> "$OUTPUT"
-			[[ $i -lt $((${#SIZES[@]}-1)) ]] && echo "," >> "$OUTPUT"
-		done
-		echo "" >> "$OUTPUT"
-		echo "    ]" >> "$OUTPUT"
-		echo -n "  }" >> "$OUTPUT"
-	done
-	echo "" >> "$OUTPUT"
-	echo "]" >> "$OUTPUT"
-	echo "JSON file created: $OUTPUT"
+    mapfile -t svg_files < <(find "$SVG_DIR" -type f -name "*.svg" | sort -u)
+
+    echo "[" > "$OUTPUT"
+    first=1
+
+    for file in "${svg_files[@]}"; do
+        [[ -e "$file" ]] || continue
+        name=$(basename "$file" .svg)
+
+        # Determine category
+        case "$file" in
+            *"/legacy/"*)
+                if [[ "$name" == armbian_* ]]; then category="armbian-legacy"
+                elif [[ "$name" == configng_* ]]; then category="configng-legacy"
+                else category="other-legacy"; fi
+                ;;
+            *)
+                if [[ "$name" == armbian_* ]]; then category="armbian"
+                elif [[ "$name" == configng_* ]]; then category="configng"
+                else category="other"; fi
+                ;;
+        esac
+
+        # Safely extract SVG metadata
+        svg_width=$(grep -oP 'width="[^"]+"' "$file" | head -n1 | cut -d'"' -f2 || echo "")
+        svg_height=$(grep -oP 'height="[^"]+"' "$file" | head -n1 | cut -d'"' -f2 || echo "")
+        svg_viewbox=$(grep -oP 'viewBox="[^"]+"' "$file" | head -n1 | cut -d'"' -f2 || echo "")
+        svg_title=$(grep -oP '<title>(.*?)</title>' "$file" | head -n1 || echo "")
+        svg_desc=$(grep -oP '<desc>(.*?)</desc>' "$file" | head -n1 || echo "")
+
+        [[ $first -eq 0 ]] && echo "," >> "$OUTPUT"
+        first=0
+        echo "  {" >> "$OUTPUT"
+        echo "    \"name\": \"$name\"," >> "$OUTPUT"
+        echo "    \"category\": \"$category\"," >> "$OUTPUT"
+        echo "    \"svg\": \"$file\"," >> "$OUTPUT"
+        echo "    \"svg_meta\": {" >> "$OUTPUT"
+        echo "      \"width\": \"$svg_width\"," >> "$OUTPUT"
+        echo "      \"height\": \"$svg_height\"," >> "$OUTPUT"
+        echo "      \"viewBox\": \"$svg_viewbox\"," >> "$OUTPUT"
+        echo "      \"title\": \"$svg_title\"," >> "$OUTPUT"
+        echo "      \"desc\": \"$svg_desc\"" >> "$OUTPUT"
+        echo "    }," >> "$OUTPUT"
+        echo "    \"pngs\": [" >> "$OUTPUT"
+
+        for i in "${!SIZES[@]}"; do
+            sz="${SIZES[$i]}"
+            png_path="images/${sz}x${sz}/${name}.png"
+            if [[ -f "$png_path" ]]; then
+                kb=$(du -k "$png_path" 2>/dev/null | cut -f1 || echo 0)
+            else
+                kb=0
+            fi
+            kb_decimal=$(printf "%.2f" "$kb")
+            echo -n "      { \"path\": \"$png_path\", \"size\": \"${sz}x${sz}\", \"kb\": ${kb_decimal} }" >> "$OUTPUT"
+            [[ $i -lt $((${#SIZES[@]}-1)) ]] && echo "," >> "$OUTPUT"
+        done
+
+        echo "" >> "$OUTPUT"
+        echo "    ]" >> "$OUTPUT"
+        echo -n "  }" >> "$OUTPUT"
+    done
+
+    echo "" >> "$OUTPUT"
+    echo "]" >> "$OUTPUT"
+    echo "JSON file created: $OUTPUT"
 }
 
 
@@ -240,7 +303,83 @@ _html_server_main() {
 	echo "Test complete"
 }
 
+
 _icon_set_from_svg() {
+    SRC_DIR="./brand_src"
+    SIZES=(16 48 512)
+
+    # Name of the base SVG (without extension) to use for favicon
+    FAVICON_BASE="configng-mascot_v2.0"  # change this to whatever your main icon is
+
+    # Check for ImageMagick's convert command
+    if ! command -v convert &> /dev/null; then
+        echo "Error: ImageMagick 'convert' command not found."
+        read -p "Would you like to install ImageMagick using 'sudo apt install imagemagick'? [Y/n] " yn
+        case "$yn" in
+            [Yy]* | "" )
+                echo "Installing ImageMagick..."
+                sudo apt update && sudo apt install imagemagick
+                if ! command -v convert &> /dev/null; then
+                    echo "Installation failed or 'convert' still not found. Exiting."
+                    exit 1
+                fi
+                ;;
+            * )
+                echo "Cannot proceed without ImageMagick. Exiting."
+                exit 1
+                ;;
+        esac
+    fi
+
+    if [ ! -d "$SRC_DIR" ]; then
+        echo "Error: Source directory '$SRC_DIR' does not exist."
+        exit 1
+    fi
+
+    shopt -s nullglob
+    svg_files=("$SRC_DIR"/*.svg)
+    if [ ${#svg_files[@]} -eq 0 ]; then
+        echo "Error: No SVG files found in '$SRC_DIR'."
+        exit 1
+    fi
+    shopt -u nullglob
+
+    for svg in "${svg_files[@]}"; do
+        base=$(basename "$svg" .svg)
+        for size in "${SIZES[@]}"; do
+            OUT_DIR="images/${size}x${size}"
+            mkdir -p "$OUT_DIR"
+            OUT_FILE="${OUT_DIR}/${base}.png"
+            if [[ ! -f "$OUT_FILE" || "$svg" -nt "$OUT_FILE" ]]; then
+                convert -background none -resize ${size}x${size} "$svg" "$OUT_FILE"
+                if [ $? -eq 0 ]; then
+                    echo "Generated $OUT_FILE"
+                else
+                    echo "Failed to convert $svg to $OUT_FILE"
+                fi
+            fi
+        done
+    done
+
+    cp -r "$SRC_DIR" "images/scalable"
+
+    # Generate multi-resolution favicon.ico from chosen SVG
+    FAVICON_SVG="$SRC_DIR/${FAVICON_BASE}.svg"
+    if [[ -f "$FAVICON_SVG" ]]; then
+        echo "Creating favicon.ico from $FAVICON_SVG"
+        convert -background none "$FAVICON_SVG" -resize 16x16 favicon-16.png
+        convert -background none "$FAVICON_SVG" -resize 32x32 favicon-32.png
+        convert -background none "$FAVICON_SVG" -resize 48x48 favicon-48.png
+        convert favicon-16.png favicon-32.png favicon-48.png favicon.ico
+        rm favicon-16.png favicon-32.png favicon-48.png
+        echo "Multi-resolution favicon.ico created."
+    else
+        echo "Could not create favicon.ico (SVG not found: $FAVICON_SVG)"
+    fi
+}
+
+
+_icon_set_from_svg_v1.0() {
 	SRC_DIR="./brand_src"
 	SIZES=(16 32 64 128 256 512)
 	# Check for ImageMagick's convert command
