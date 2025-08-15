@@ -1,0 +1,138 @@
+[
+  {
+    "name": "armbian_discord_v2.1",
+    "category": "armbian",
+    "svg": "./brand_src/armbian_discord_v2.1.svg",
+    "svg_meta": {
+      "width": "256",
+      "height": "256",
+      "viewBox": "0 0 256 256",
+      "title": "",
+      "desc": ""
+    },
+    "pngs": [
+      { "path": "images/16x16/armbian_discord_v2.1.png", "size": "16x16", "kb": 4.00 },
+      { "path": "images/32x32/armbian_discord_v2.1.png", "size": "32x32", "kb": 0.00 },
+      { "path": "images/512x512/armbian_discord_v2.1.png", "size": "512x512", "kb": 60.00 }
+    ]
+  },
+  {
+    "name": "armbian_font.v2.1",
+    "category": "armbian",
+    "svg": "./brand_src/armbian_font.v2.1.svg",
+    "svg_meta": {
+      "width": "256",
+      "height": "48",
+      "viewBox": "0 0 256 48",
+      "title": "",
+      "desc": ""
+    },
+    "pngs": [
+      { "path": "images/16x16/armbian_font.v2.1.png", "size": "16x16", "kb": 4.00 },
+      { "path": "images/32x32/armbian_font.v2.1.png", "size": "32x32", "kb": 0.00 },
+      { "path": "images/512x512/armbian_font.v2.1.png", "size": "512x512", "kb": 40.00 }
+    ]
+  },
+  {
+    "name": "configng_cog_v2.0",
+    "category": "configng",
+    "svg": "./brand_src/configng_cog_v2.0.svg",
+    "svg_meta": {
+      "width": "256",
+      "height": "256",
+      "viewBox": "0 0 256 256",
+      "title": "",
+      "desc": ""
+    },
+    "pngs": [
+      { "path": "images/16x16/configng_cog_v2.0.png", "size": "16x16", "kb": 4.00 },
+      { "path": "images/32x32/configng_cog_v2.0.png", "size": "32x32", "kb": 0.00 },
+      { "path": "images/512x512/configng_cog_v2.0.png", "size": "512x512", "kb": 60.00 }
+    ]
+  },
+  {
+    "name": "configng-mascot_v2.0",
+    "category": "other",
+    "svg": "./brand_src/configng-mascot_v2.0.svg",
+    "svg_meta": {
+      "width": "512",
+      "height": "512",
+      "viewBox": "0 0 512 512",
+      "title": "",
+      "desc": ""
+    },
+    "pngs": [
+      { "path": "images/16x16/configng-mascot_v2.0.png", "size": "16x16", "kb": 4.00 },
+      { "path": "images/32x32/configng-mascot_v2.0.png", "size": "32x32", "kb": 0.00 },
+      { "path": "images/512x512/configng-mascot_v2.0.png", "size": "512x512", "kb": 48.00 }
+    ]
+  },
+  {
+    "name": "armbian_cpu_v1.0",
+    "category": "armbian-legacy",
+    "svg": "./brand_src/legacy/armbian_cpu_v1.0.svg",
+    "svg_meta": {
+      "width": "1920",
+      "height": "1174",
+      "viewBox": "0 0 728.1 728",
+      "title": "",
+      "desc": ""
+    },
+    "pngs": [
+      { "path": "images/16x16/armbian_cpu_v1.0.png", "size": "16x16", "kb": 0.00 },
+      { "path": "images/32x32/armbian_cpu_v1.0.png", "size": "32x32", "kb": 0.00 },
+      { "path": "images/512x512/armbian_cpu_v1.0.png", "size": "512x512", "kb": 0.00 }
+    ]
+  },
+  {
+    "name": "armbian_font_v1.5",
+    "category": "armbian-legacy",
+    "svg": "./brand_src/legacy/armbian_font_v1.5.svg",
+    "svg_meta": {
+      "width": "256",
+      "height": "48",
+      "viewBox": "0 0 256 48",
+      "title": "",
+      "desc": ""
+    },
+    "pngs": [
+      { "path": "images/16x16/armbian_font_v1.5.png", "size": "16x16", "kb": 0.00 },
+      { "path": "images/32x32/armbian_font_v1.5.png", "size": "32x32", "kb": 0.00 },
+      { "path": "images/512x512/armbian_font_v1.5.png", "size": "512x512", "kb": 0.00 }
+    ]
+  },
+  {
+    "name": "configng_cog_v1.0",
+    "category": "configng-legacy",
+    "svg": "./brand_src/legacy/configng_cog_v1.0.svg",
+    "svg_meta": {
+      "width": "256",
+      "height": "256",
+      "viewBox": "0 0 256 256",
+      "title": "",
+      "desc": ""
+    },
+    "pngs": [
+      { "path": "images/16x16/configng_cog_v1.0.png", "size": "16x16", "kb": 0.00 },
+      { "path": "images/32x32/configng_cog_v1.0.png", "size": "32x32", "kb": 0.00 },
+      { "path": "images/512x512/configng_cog_v1.0.png", "size": "512x512", "kb": 0.00 }
+    ]
+  },
+  {
+    "name": "configng-tux_v1.0",
+    "category": "other-legacy",
+    "svg": "./brand_src/legacy/configng-tux_v1.0.svg",
+    "svg_meta": {
+      "width": "256",
+      "height": "256",
+      "viewBox": "0 0 256 256",
+      "title": "",
+      "desc": ""
+    },
+    "pngs": [
+      { "path": "images/16x16/configng-tux_v1.0.png", "size": "16x16", "kb": 0.00 },
+      { "path": "images/32x32/configng-tux_v1.0.png", "size": "32x32", "kb": 0.00 },
+      { "path": "images/512x512/configng-tux_v1.0.png", "size": "512x512", "kb": 0.00 }
+    ]
+  }
+]
